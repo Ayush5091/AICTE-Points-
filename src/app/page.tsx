@@ -78,7 +78,7 @@ export default function Home() {
     };
 
     fetchData();
-  }, [user, token]);
+  }, [user, token, isLoading, router]);
 
   const handleMarkAsRead = async () => {
     if (!token || unreadCount === 0) return;
