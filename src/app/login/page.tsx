@@ -44,12 +44,7 @@ export default function LoginPage() {
     return (
         <div className="relative flex h-[100dvh] md:min-h-screen w-full flex-col items-center justify-center bg-black md:bg-gray-50 md:dark:bg-[#0a0a0a] md:p-4 lg:p-8 overflow-hidden md:overflow-y-auto font-sans antialiased transition-colors duration-300">
 
-            {/* Header / Navigation */}
-            <div className="absolute top-0 left-0 w-full flex items-center p-4 justify-between z-10 hidden md:flex">
-                <Link href="/" className="text-gray-900 dark:text-white flex size-12 items-center justify-center rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
-                    <span className="material-symbols-outlined text-2xl">arrow_back</span>
-                </Link>
-            </div>
+            {/* Header / Navigation (removed) */}
 
             {/* Main Container / Hero + Bottom Sheet OR Desktop Card */}
             <main className="flex-grow md:flex-grow-0 flex flex-col justify-between pt-8 md:pt-0 z-10 w-full h-full md:h-auto relative md:max-w-5xl md:mx-auto md:flex-row md:items-stretch md:bg-white md:dark:bg-[#121212] md:shadow-2xl md:rounded-3xl md:overflow-hidden md:border md:border-gray-100 md:dark:border-gray-800 transition-all duration-300">
