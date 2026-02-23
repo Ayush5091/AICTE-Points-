@@ -8,7 +8,7 @@ import UserAvatar from "@/components/UserAvatar";
 import AdminDashboard from "@/components/AdminDashboard";
 
 export default function Home() {
-  const { user, token } = useAuth();
+  const { user, token, isLoading } = useAuth();
   const router = useRouter();
 
   const [studentInfo, setStudentInfo] = useState<any>(null);
@@ -18,9 +18,10 @@ export default function Home() {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
   useEffect(() => {
+    if (isLoading) return;
+
     if (!user) {
-      // User might be loading initially, but we shouldn't redirect immediately if loading is true. 
-      // AuthContext handles logout pushing if totally missing.
+      router.push('/login');
       return;
     }
 
