@@ -131,6 +131,14 @@ export default function Home() {
   const targetPoints = 100;
   const progressPercent = Math.min(100, Math.round((totalPoints / targetPoints) * 100));
 
+  if (isLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary text-primary"></div>
+      </div>
+    );
+  }
+
   if (user?.role === 'admin') {
     return <AdminDashboard />;
   }
