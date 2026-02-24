@@ -23,13 +23,15 @@ export default function Navigation() {
 
     // Filter items based on user role
     const navItems = user?.role === 'admin'
-        ? allNavItems.filter(item => item.label === 'Home' || item.label === 'Requests' || item.label === 'Proofs')
+        ? allNavItems.filter(item => ['Home', 'Requests', 'Proofs', 'Profile'].includes(item.label))
         : allNavItems;
+
+    const gridColsClass = navItems.length === 5 ? 'grid-cols-5' : (navItems.length === 4 ? 'grid-cols-4' : 'grid-cols-3');
 
     return (
         <>
             {/* Mobile Bottom Navigation */}
-            <nav className="md:hidden fixed bottom-0 left-0 w-full bg-card-light dark:bg-card-dark border-t border-subtle-light dark:border-subtle-dark px-2 py-4 pb-6 grid grid-cols-5 items-center justify-items-center z-30 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]">
+            <nav className={`md:hidden fixed bottom-0 left-0 w-full bg-card-light dark:bg-card-dark border-t border-subtle-light dark:border-subtle-dark px-2 py-4 pb-6 grid ${gridColsClass} items-center justify-items-center z-30 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]`}>
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;
 
