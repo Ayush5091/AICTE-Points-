@@ -106,27 +106,22 @@ export default function SubmissionsHistoryScreen() {
         }
     };
 
-    // For students: "Pending" means approved requests (waiting for proof) OR pending submissions (waiting for admin).
-    // For admins: "Pending" means pending submissions (waiting for admin verification).
-    const pendingItems = historyItems.filter(i =>
-        user?.role === 'admin' ?
-            (i.type === 'submission' && i.status === 'pending') :
-            (i.status !== 'verified' && i.status !== 'rejected' && !(i.type === 'request' && i.status === 'pending'))
-    );
+    // Pending Updates: any pending request or pending submission
+    const pendingItems = historyItems.filter(i => i.status === 'pending');
+
+    // Verified History: any approved/rejected request or verified/rejected submission
     const verifiedItems = historyItems.filter(i =>
-        user?.role === 'admin' ?
-            (i.status === 'verified' || i.status === 'rejected' || (i.type === 'request' && (i.status === 'approved' || i.status === 'rejected'))) :
-            (i.status === 'verified' || i.status === 'rejected')
+        i.status === 'verified' || i.status === 'rejected' || i.status === 'approved'
     );
     const currentItems = activeTab === 'pending' ? pendingItems : verifiedItems;
 
     const getStatusDisplay = (item: any) => {
         if (item.type === 'request') {
-            if (item.status === 'approved') return { text: 'Approved (Awaiting Proof)', color: 'text-blue-600 dark:text-blue-400', dot: 'bg-blue-500' };
+            if (item.status === 'approved') return { text: 'Approved', color: 'text-blue-600 dark:text-blue-400', dot: 'bg-blue-500' };
             if (item.status === 'rejected') return { text: 'Request Rejected', color: 'text-red-600 dark:text-red-400', dot: 'bg-red-500' };
             if (item.status === 'pending') return { text: 'Request Pending', color: 'text-orange-600 dark:text-orange-400', dot: 'bg-orange-500' };
         } else {
-            if (item.status === 'pending') return { text: 'Under Review', color: 'text-orange-600 dark:text-orange-400', dot: 'bg-orange-500' };
+            if (item.status === 'pending') return { text: 'Proof Under Review', color: 'text-orange-600 dark:text-orange-400', dot: 'bg-orange-500' };
             if (item.status === 'verified') return { text: 'Verified', color: 'text-green-700 dark:text-green-400', dot: 'bg-green-500' };
             if (item.status === 'rejected') return { text: 'Proof Rejected', color: 'text-red-600 dark:text-red-400', dot: 'bg-red-500' };
         }

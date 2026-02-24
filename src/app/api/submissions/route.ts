@@ -44,7 +44,7 @@ export async function GET(request: Request) {
         const status = searchParams.get('status');
 
         let queryStr = `
-      SELECT sub.id, s.name as student_name, a.name as activity_name, sub.status, sub.submitted_at, sub.description, sub.proof, sub.hours_spent, sub.activity_date
+      SELECT sub.id, sub.request_id, s.name as student_name, a.name as activity_name, sub.status, sub.submitted_at, sub.description, sub.proof, sub.hours_spent, sub.activity_date
       FROM submissions sub
       JOIN activity_requests r ON sub.request_id = r.id
       JOIN students s ON r.student_id = s.id
@@ -61,6 +61,7 @@ export async function GET(request: Request) {
 
         return NextResponse.json(rows.map(r => ({
             submission_id: r.id,
+            request_id: r.request_id,
             student_name: r.student_name,
             activity_name: r.activity_name,
             status: r.status,

@@ -27,8 +27,9 @@ export default function Home() {
 
     const fetchData = async () => {
       try {
-        const [profileRes, historyRes, notifRes] = await Promise.all([
+        const [profileRes, reqRes, subRes, notifRes] = await Promise.all([
           fetch('/api/students/me', { headers: { 'Authorization': `Bearer ${token}` } }),
+          fetch('/api/activity-requests/me', { headers: { 'Authorization': `Bearer ${token}` } }),
           fetch('/api/submissions/me', { headers: { 'Authorization': `Bearer ${token}` } }),
           fetch('/api/notifications', { headers: { 'Authorization': `Bearer ${token}` } })
         ]);
@@ -39,38 +40,60 @@ export default function Home() {
         if (notifRes.ok) {
           setNotifications(await notifRes.json());
         }
-        if (historyRes.ok) {
-          const history = await historyRes.json();
-          setRecentActivities(history.slice(0, 3)); // Only latest 3
 
-          // Calculate past 6 months data for the graph
-          const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-          const currentDate = new Date();
-          const last6Months = Array.from({ length: 6 }, (_, i) => {
-            const d = new Date(currentDate.getFullYear(), currentDate.getMonth() - (5 - i), 1);
-            return { monthLabel: months[d.getMonth()], year: d.getFullYear(), month: d.getMonth(), points: 0 };
-          });
+        // Merge requests and submissions for Dashboard History
+        let history: any[] = [];
+        if (reqRes.ok && subRes.ok) {
+          const requests = await reqRes.json();
+          const submissions = await subRes.json();
 
-          // Aggregate verified submission points 
-          history.forEach((sub: any) => {
-            if (sub.status === 'verified' && sub.submitted_at) {
-              const d = new Date(sub.submitted_at);
-              const bucket = last6Months.find(m => m.month === d.getMonth() && m.year === d.getFullYear());
-              if (bucket) {
-                bucket.points += (sub.points || 0);
-              }
-            }
-          });
-
-          const data = last6Months.map(b => b.points);
-          const maxVal = Math.max(10, ...data); // Ensure there's at least some scale
-
-          // Fallback static data if no history so graph doesn't look empty and flat
-          if (data.every(v => v === 0)) {
-            setChartData({ labels: last6Months.map(m => m.monthLabel), data: [10, 20, 15, 30, 25, 40], maxVal: 50 });
-          } else {
-            setChartData({ labels: last6Months.map(m => m.monthLabel), data, maxVal });
+          const subMap = new Map();
+          if (Array.isArray(submissions)) {
+            submissions.forEach((s: any) => subMap.set(s.request_id || s.id, s));
           }
+
+          if (Array.isArray(requests)) {
+            requests.forEach((r: any) => {
+              const sub = subMap.get(r.request_id || r.id);
+              if (sub) {
+                history.push({ ...sub, type: 'submission', date: sub.submitted_at, activity: sub.activity || r.activity || r.activity_name });
+              } else {
+                history.push({ ...r, type: 'request', date: r.requested_at, activity: r.activity || r.activity_name });
+              }
+            });
+          }
+          history.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        }
+
+        setRecentActivities(history.slice(0, 3)); // Only latest 3
+
+        // Calculate past 6 months data for the graph
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const currentDate = new Date();
+        const last6Months = Array.from({ length: 6 }, (_, i) => {
+          const d = new Date(currentDate.getFullYear(), currentDate.getMonth() - (5 - i), 1);
+          return { monthLabel: months[d.getMonth()], year: d.getFullYear(), month: d.getMonth(), points: 0 };
+        });
+
+        // Aggregate verified submission points and approved requests
+        history.forEach((item: any) => {
+          if ((item.status === 'verified' || item.status === 'approved') && item.date) {
+            const d = new Date(item.date);
+            const bucket = last6Months.find(m => m.month === d.getMonth() && m.year === d.getFullYear());
+            if (bucket) {
+              bucket.points += (item.points || 0);
+            }
+          }
+        });
+
+        const data = last6Months.map(b => b.points);
+        const maxVal = Math.max(10, ...data); // Ensure there's at least some scale
+
+        // Fallback static data if no history so graph doesn't look empty and flat
+        if (data.every(v => v === 0)) {
+          setChartData({ labels: last6Months.map(m => m.monthLabel), data: [10, 20, 15, 30, 25, 40], maxVal: 50 });
+        } else {
+          setChartData({ labels: last6Months.map(m => m.monthLabel), data, maxVal });
         }
       } catch (err) {
         console.error("Failed to load dashboard data");
@@ -292,23 +315,23 @@ export default function Home() {
                   No recent activities. It's time to request one!
                 </div>
               ) : recentActivities.map((activity, idx) => (
-                <div key={idx} className={`bg-card-light dark:bg-card-dark p-4 md:p-5 rounded-2xl shadow-soft flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all ${activity.status === 'approved' ? 'opacity-80 hover:opacity-100' : 'hover:shadow-md border-2 border-transparent hover:border-subtle-light dark:hover:border-subtle-dark'}`}>
+                <div key={idx} className={`bg-card-light dark:bg-card-dark p-4 md:p-5 rounded-2xl shadow-soft flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all ${activity.status === 'verified' ? 'opacity-80 hover:opacity-100' : 'hover:shadow-md border-2 border-transparent hover:border-subtle-light dark:hover:border-subtle-dark'}`}>
                   <div className="flex items-center gap-4 md:gap-5">
-                    <div className={`h-12 w-12 md:h-14 md:w-14 shrink-0 rounded-xl flex items-center justify-center ${activity.status === 'approved' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400'}`}>
+                    <div className={`h-12 w-12 md:h-14 md:w-14 shrink-0 rounded-xl flex items-center justify-center ${activity.status === 'verified' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400'}`}>
                       <span className="material-icons-outlined md:text-3xl">
-                        {activity.status === 'approved' ? 'verified' : 'pending_actions'}
+                        {activity.status === 'verified' ? 'verified' : 'pending_actions'}
                       </span>
                     </div>
                     <div>
-                      <h4 className="text-sm md:text-base font-bold text-text-light dark:text-text-dark">{activity.activity}</h4>
+                      <h4 className="text-sm md:text-base font-bold text-text-light dark:text-text-dark">{activity.activity_name || activity.activity || 'Activity'}</h4>
                       <p className="text-xs md:text-sm text-text-muted-light dark:text-text-muted-dark mt-0.5 md:mt-1">
                         {new Date(activity.submitted_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center md:flex-col md:items-end justify-between md:justify-center gap-1 md:gap-2">
-                    <span className={`text-[10px] md:text-xs font-bold px-2 py-0.5 md:px-3 md:py-1 rounded-full uppercase tracking-wider ${activity.status === 'approved'
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+                    <span className={`text-[10px] md:text-xs font-bold px-2 py-0.5 md:px-3 md:py-1 rounded-full uppercase tracking-wider ${activity.status === 'verified'
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
                       : 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
                       }`}>
                       {activity.status}
