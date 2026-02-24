@@ -9,7 +9,7 @@ export async function GET(request: Request) {
         const { rows } = await db.query(`
             SELECT 
                 st.id, st.name, st.email, st.usn, st.phone_number, st.department,
-                COALESCE(SUM(a.points), 0) as total_points,
+                COALESCE(SUM(CASE WHEN su.status = 'approved' THEN a.points ELSE 0 END), 0) as total_points,
                 COUNT(su.id) as completed_activities
             FROM students st
             LEFT JOIN activity_requests r ON st.id = r.student_id

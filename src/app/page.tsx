@@ -166,6 +166,25 @@ export default function Home() {
     return <AdminDashboard />;
   }
 
+  const getCategoryIconInfo = (category: string) => {
+    switch (category?.toLowerCase()) {
+      case 'cultural':
+        return { icon: 'palette', bg: 'bg-purple-50 dark:bg-purple-900/20', text: 'text-purple-600 dark:text-purple-400' };
+      case 'community service':
+        return { icon: 'volunteer_activism', bg: 'bg-pink-50 dark:bg-pink-900/20', text: 'text-pink-600 dark:text-pink-400' };
+      case 'technical':
+        return { icon: 'computer', bg: 'bg-teal-50 dark:bg-teal-900/20', text: 'text-teal-600 dark:text-teal-400' };
+      case 'sports':
+        return { icon: 'sports_basketball', bg: 'bg-orange-50 dark:bg-orange-900/20', text: 'text-orange-600 dark:text-orange-400' };
+      case 'professional':
+        return { icon: 'work', bg: 'bg-indigo-50 dark:bg-indigo-900/20', text: 'text-indigo-600 dark:text-indigo-400' };
+      case 'national initiative':
+        return { icon: 'flag', bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-600 dark:text-emerald-400' };
+      default:
+        return { icon: 'assignment', bg: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-blue-600 dark:text-blue-400' };
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
@@ -317,11 +336,16 @@ export default function Home() {
               ) : recentActivities.map((activity, idx) => (
                 <div key={idx} className={`bg-card-light dark:bg-card-dark p-4 md:p-5 rounded-2xl shadow-soft flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all ${activity.status === 'verified' ? 'opacity-80 hover:opacity-100' : 'hover:shadow-md border-2 border-transparent hover:border-subtle-light dark:hover:border-subtle-dark'}`}>
                   <div className="flex items-center gap-4 md:gap-5">
-                    <div className={`h-12 w-12 md:h-14 md:w-14 shrink-0 rounded-xl flex items-center justify-center ${activity.status === 'verified' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400'}`}>
-                      <span className="material-icons-outlined md:text-3xl">
-                        {activity.status === 'verified' ? 'verified' : 'pending_actions'}
-                      </span>
-                    </div>
+                    {(() => {
+                      const catInfo = getCategoryIconInfo(activity.category);
+                      return (
+                        <div className={`h-12 w-12 md:h-14 md:w-14 shrink-0 rounded-xl flex items-center justify-center ${catInfo.bg} ${catInfo.text}`}>
+                          <span className="material-icons-outlined md:text-3xl">
+                            {catInfo.icon}
+                          </span>
+                        </div>
+                      );
+                    })()}
                     <div>
                       <h4 className="text-sm md:text-base font-bold text-text-light dark:text-text-dark">{activity.activity_name || activity.activity || 'Activity'}</h4>
                       <p className="text-xs md:text-sm text-text-muted-light dark:text-text-muted-dark mt-0.5 md:mt-1">
