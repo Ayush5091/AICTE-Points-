@@ -2,6 +2,29 @@ import { NextResponse } from 'next/server';
 import db from '@/lib/db';
 import { createAccessToken, decodeAccessToken } from '@/lib/auth';
 
+function extractDepartment(email: string): string | null {
+    if (!email) return null;
+    const localPart = email.split('@')[0];
+    const parts = localPart.split('.');
+    if (parts.length > 1) {
+        const lastPart = parts[parts.length - 1];
+        const match = lastPart.match(/^([a-z]+)\d*$/i);
+        if (match) {
+            const code = match[1].toLowerCase();
+            const deptMap: Record<string, string> = {
+                'cs': 'Computer Science',
+                'is': 'Information Science',
+                'ai': 'AIML',
+                'ec': 'Electronics and Communications',
+                'me': 'Mechanical',
+                'ra': 'Robotics'
+            };
+            return deptMap[code] || code.toUpperCase();
+        }
+    }
+    return null;
+}
+
 export async function POST(request: Request) {
     try {
         const { token, usn } = await request.json();
@@ -17,10 +40,11 @@ export async function POST(request: Request) {
         if (rows.length > 0) {
             return NextResponse.json({ detail: "USN already registered" }, { status: 400 });
         }
+        const department = extractDepartment(payload.email);
 
         const insertRes = await db.query(
-            'INSERT INTO students (name, email, google_sub, usn) VALUES ($1, $2, $3, $4) RETURNING id',
-            [payload.name, payload.email, payload.sub, upperUsn]
+            'INSERT INTO students (name, email, google_sub, usn, department) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+            [payload.name, payload.email, payload.sub, upperUsn, department]
         );
 
         const studentId = insertRes.rows[0].id;
