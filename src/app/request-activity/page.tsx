@@ -57,7 +57,7 @@ export default function RequestActivityScreen() {
         <div className="flex flex-col min-h-screen">
             {/* Header */}
             <header className="flex items-center justify-between px-6 md:px-10 pt-8 pb-6 bg-background-light dark:bg-background-dark sticky top-0 z-10">
-                <button className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                <button type="button" onClick={() => router.back()} className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
                     <span className="material-symbols-outlined text-slate-900 dark:text-white text-2xl md:text-3xl">arrow_back</span>
                 </button>
                 <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Request Activity</h1>

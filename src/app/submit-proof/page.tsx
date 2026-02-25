@@ -68,7 +68,7 @@ export default function SubmitProofScreen() {
         <div className="flex flex-col min-h-screen relative overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between px-6 md:px-10 pt-8 pb-4 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md sticky top-0 z-20">
-                <button className="flex items-center justify-center p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
+                <button type="button" onClick={() => router.back()} className="flex items-center justify-center p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
                     <span className="material-symbols-outlined text-primary dark:text-white text-xl md:text-2xl">arrow_back</span>
                 </button>
                 <h1 className="text-lg md:text-2xl font-bold text-primary dark:text-white flex-1 text-center pr-8">Submit Proof</h1>
