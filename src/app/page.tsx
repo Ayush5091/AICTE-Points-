@@ -185,6 +185,18 @@ export default function Home() {
     }
   };
 
+  const getStatusBadgeClass = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'approved':
+      case 'verified':
+        return 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300';
+      default:
+        return 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300';
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header */}
@@ -349,15 +361,12 @@ export default function Home() {
                     <div>
                       <h4 className="text-sm md:text-base font-bold text-text-light dark:text-text-dark">{activity.activity_name || activity.activity || 'Activity'}</h4>
                       <p className="text-xs md:text-sm text-text-muted-light dark:text-text-muted-dark mt-0.5 md:mt-1">
-                        {new Date(activity.submitted_at).toLocaleDateString()}
+                        {new Date(activity.date || activity.submitted_at || activity.requested_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center md:flex-col md:items-end justify-between md:justify-center gap-1 md:gap-2">
-                    <span className={`text-[10px] md:text-xs font-bold px-2 py-0.5 md:px-3 md:py-1 rounded-full uppercase tracking-wider ${activity.status === 'verified'
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
-                      : 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
-                      }`}>
+                    <span className={`text-[10px] md:text-xs font-bold px-2 py-0.5 md:px-3 md:py-1 rounded-full uppercase tracking-wider ${getStatusBadgeClass(activity.status)}`}>
                       {activity.status}
                     </span>
                   </div>
