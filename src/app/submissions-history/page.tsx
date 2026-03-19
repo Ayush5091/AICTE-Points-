@@ -12,13 +12,13 @@ export default function SubmissionsHistoryScreen() {
     const [historyItems, setHistoryItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Modal state
     const [selectedItem, setSelectedItem] = useState<any | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (!token) return;
+
         const fetchData = async () => {
             try {
                 const reqEndpoint = user?.role === 'admin' ? '/api/activity-requests' : '/api/activity-requests/me';
@@ -33,13 +33,13 @@ export default function SubmissionsHistoryScreen() {
 
                 const subMap = new Map();
                 if (Array.isArray(submissions)) {
-                    submissions.forEach((s: any) => subMap.set(s.request_id || s.id, s)); // Admin API might return just id
+                    submissions.forEach((s: any) => subMap.set(s.request_id || s.id, s));
                 }
 
                 const items: any[] = [];
                 if (Array.isArray(requests)) {
                     requests.forEach((r: any) => {
-                        const sub = subMap.get(r.request_id || r.id); // Admin API returns request_id in submissions, id in requests
+                        const sub = subMap.get(r.request_id || r.id);
                         if (sub) {
                             items.push({
                                 type: 'submission',
@@ -48,7 +48,7 @@ export default function SubmissionsHistoryScreen() {
                                 activity: r.activity || r.activity_name,
                                 points: r.points,
                                 category: r.category,
-                                status: sub.status, // pending, verified, rejected
+                                status: sub.status,
                                 date: sub.submitted_at,
                                 student_name: sub.student_name || r.student_name,
                                 description: sub.description,
@@ -64,7 +64,7 @@ export default function SubmissionsHistoryScreen() {
                                 activity: r.activity || r.activity_name,
                                 points: r.points,
                                 category: r.category,
-                                status: r.status, // pending, approved, rejected
+                                status: r.status,
                                 date: r.requested_at,
                                 student_name: r.student_name,
                                 description: r.description
@@ -73,7 +73,6 @@ export default function SubmissionsHistoryScreen() {
                     });
                 }
 
-                // Sort by date descending
                 items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
                 setHistoryItems(items);
             } catch (err) {
@@ -105,10 +104,7 @@ export default function SubmissionsHistoryScreen() {
         }
     };
 
-    // Pending Updates: any pending request or pending submission
     const pendingItems = historyItems.filter(i => i.status === 'pending');
-
-    // Verified History: any approved/rejected request or verified/rejected submission
     const verifiedItems = historyItems.filter(i =>
         i.status === 'verified' || i.status === 'rejected' || i.status === 'approved'
     );
@@ -126,20 +122,28 @@ export default function SubmissionsHistoryScreen() {
         }
         return { text: 'Unknown', color: 'text-gray-500', dot: 'bg-gray-500' };
     };
+
     return (
         <div className="flex flex-col min-h-screen">
-            {/* Header */}
             <header className="sticky top-0 z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 px-6 md:px-10 pt-10 md:pt-16 pb-4">
                 <div className="flex items-center justify-between mb-6 max-w-5xl mx-auto w-full">
                     <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-text-main dark:text-white">Submissions</h1>
                     <div className="flex items-center gap-4">
+                        {user?.role !== 'admin' && (
+                            <button
+                                onClick={() => router.push('/request-activity')}
+                                className="hidden md:flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl font-bold shadow-md hover:bg-blue-600 transition-colors"
+                            >
+                                <span className="material-symbols-outlined">add</span>
+                                Create Request
+                            </button>
+                        )}
                         <button className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-white dark:bg-gray-800 shadow-sm text-text-main dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-gray-100 dark:border-gray-700">
                             <span className="material-symbols-outlined text-xl md:text-2xl">notifications</span>
                         </button>
                     </div>
                 </div>
 
-                {/* Segmented Control */}
                 <div className="relative flex w-full max-w-xl mx-auto p-1.5 bg-gray-200/50 dark:bg-gray-800/80 rounded-full">
                     <div className={`absolute left-1.5 top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-white dark:bg-gray-700 rounded-full shadow-sm z-0 transition-transform duration-300 ${activeTab === 'verified' ? 'translate-x-[calc(100%+6px)]' : ''}`}></div>
                     <button onClick={() => setActiveTab('pending')} className={`relative z-10 flex-1 py-2.5 md:py-3 text-sm md:text-base font-semibold text-center rounded-full transition-colors ${activeTab === 'pending' ? 'text-text-main dark:text-white' : 'text-slate-500 dark:text-gray-400 hover:text-text-main dark:hover:text-white'}`}>
@@ -151,9 +155,7 @@ export default function SubmissionsHistoryScreen() {
                 </div>
             </header>
 
-            {/* Main Content */}
             <main className="flex-1 px-5 md:px-10 py-8 space-y-6 pb-24 max-w-5xl mx-auto w-full">
-
                 <div className="flex items-center justify-between px-2 mb-2">
                     <span className="text-xs md:text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-gray-400">
                         {activeTab === 'pending' ? `In Progress (${pendingItems.length})` : `Completed (${verifiedItems.length})`}
@@ -213,7 +215,6 @@ export default function SubmissionsHistoryScreen() {
                                             <span className={`text-sm font-bold tracking-wide ${statusInfo.color}`}>{statusInfo.text}</span>
                                         </div>
 
-                                        {/* Show an action button if it's approved (submit proof) */}
                                         {user?.role === 'student' && item.status === 'approved' && item.type === 'request' && (
                                             <button onClick={(e) => { e.stopPropagation(); router.push('/submit-proof'); }} className="flex items-center justify-center px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all text-sm font-bold">
                                                 Submit Proof
@@ -227,12 +228,11 @@ export default function SubmissionsHistoryScreen() {
                 )}
             </main>
 
-            {/* Admin Review Modal */}
             <AdminReviewModal
                 isOpen={isModalOpen}
                 onClose={() => { setIsModalOpen(false); setSelectedItem(null); }}
                 item={selectedItem}
-                onApprove={selectedItem?.type === 'request' ? undefined : handleVerify} // We only verify here, approve is on the other page
+                onApprove={selectedItem?.type === 'request' ? undefined : handleVerify}
                 isSubmitting={isSubmitting}
             />
         </div>
