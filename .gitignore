@@ -142,3 +142,14 @@ page_history.txt
 analyze.txt
 *.tmp
 *.temp
+
+# -----------------------------------------------------------------------------
+# Extra Docs, Specs & Tool Files
+# -----------------------------------------------------------------------------
+docs/
+DESIGN.md
+ENHANCED_FEATURES.md
+PRODUCT.md
+skills-lock.json
+python_app_legacy/
+
