@@ -3,7 +3,7 @@
 
 > A full-stack student activity management framework that streamlines activity tracking, event verification, approval workflows, and institutional point management through an integrated web and mobile platform.
 
-🌐 **Live Demo:** :[contentReference[oaicite:0]{index=0}](https://aicte-beta.vercel.app/)
+🌐 **Live Demo:** : https://aicte-beta.vercel.app/
 
 ---
 
